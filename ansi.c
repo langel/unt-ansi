@@ -96,6 +96,8 @@ int main( int argc, char *argv[] ) {
 			unsigned int x;
 			unsigned int y = 0;
 			while ((x=fgetc(file))!=EOF) {
+				// magic sauce 192kbps modem style
+				usleep(5);
 				if (y==256) {
 					y = 27;
 					if (x==91) {
