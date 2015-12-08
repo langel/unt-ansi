@@ -54,9 +54,15 @@ void print_cp437_chars() {
 int str_to_num(const char *str) {
 	int len = strlen(str);
 	int i;
-	int result = (str[0] - '0');
+	unsigned int result = str[0];
+	printf("%s", " begin str_to_num ");
+	printf("%s", str);
+	printf("%s", " == ");
+	printf("%d", result);
 	for(i=1; i<len; i++) {
 		result += 10 * (str[i] - '0');
+		printf("%s", " ");
+		printf("%d", result);
 	}
 	return result;
 }
@@ -119,61 +125,57 @@ int main( int argc, char *argv[] ) {
 				//usleep(5);
 				// NO WE DO 14.4kbps
 				usleep(69);
+				// buffer escape sequence
+				if (escape_seq == true) {
+					cur_esc_seq[i] = (char)x;
+				}
 				// check if escape sequence must be terminated
-				if ((x >= 65 && x <= 90) || (x >= 97 && x <= 122)) {
+				if ((x >= 65 && x <= 90) || (x >= 97 && x <= 122) && escape_seq == true) {
 					escape_seq = false;
+					cur_esc_param[i+1] = '\0';
+					//esc_x = strtol(cur_esc_param, &end, 10);
+					// XXX must truncate to only digits~~~!!!
+					esc_x = atoi(cur_esc_param);
+					//printf("%s", " || ");
+					//printf("%s", cur_esc_param);
+//						esc_x = str_to_num(cur_esc_param);
+					//printf("%s", " -- ");
+					//printf("%d", esc_x);
+					// cursor move right
+					if (x == 'C') {
+						cursor_x += esc_x;	
+					}
+					// cursor move left
+					if (x == 'D') {
+						cursor_x -= esc_x;
+					}
+					// cursor move to column
+					if (x == 'G') {
+						cursor_x = esc_x;
+					}
+					// cursor move to position
+					if (x == 'H') {
+						cursor_x = esc_x;
+					}
+					// cursor move to position
+					if (x == 'f') {
+						cursor_x = esc_x;
+					}
+					// save cursor position
+					if (x == 's') {
+						cursor_x_save = esc_x;	
+					}
+					// restore cursor position
+					if (x == 'u') {
+						cursor_x = cursor_x_save;
+					}
+					cur_esc_seq[0] = cur_esc_param[0] = '\0';
 				}
 				// check for newline, carraige, and ESC
 				if (x==10 || x==13 || x==27) {
 					if (x==27) {
-						
-						for (i = 0; !((x >= 65 && x <= 90) || (x >= 97 && x <= 122)); i++) {
-							//c = (char)x;
-							cur_esc_seq[i] = (char)x;
-							printf("%c", x);
-							// shouldn't run into EOF mid escape sequence
-							if ((x = fgetc(file)) == EOF) {
-								x = 100;
-							}
-						}
-						printf("%c", x);
-						for (i = 2; cur_esc_seq[i] != x && cur_esc_seq[i] != ';'; i++) {
-							cur_esc_param[i-2] = cur_esc_seq[i];
-						}
-						printf("%s", " || ");
-						printf("%s", cur_esc_param);
-						esc_x = str_to_num(cur_esc_param);
-						printf("%s", " -- ");
-						printf("%d", esc_x);
-						// cursor move right
-						if (x == 'C') {
-							cursor_x += esc_x;	
-						}
-						// cursor move left
-						if (x == 'D') {
-							cursor_x -= esc_x;
-						}
-						// cursor move to column
-						if (x == 'G') {
-							cursor_x = esc_x;
-						}
-						// cursor move to position
-						if (x == 'H') {
-							cursor_x = esc_x;
-						}
-						// cursor move to position
-						if (x == 'f') {
-							cursor_x = esc_x;
-						}
-						// save cursor position
-						if (x == 's') {
-							cursor_x_save = esc_x;	
-						}
-						// restore cursor position
-						if (x == 'u') {
-							cursor_x = cursor_x_save;
-						}
-						cur_esc_seq[0] = cur_esc_param[0] = '\0';
+						escape_seq = true;
+						i = 0;
 					}
 					if (x==10 || x==13) {
 						//sprintf(str, "%d", cursor_x);
