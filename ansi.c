@@ -75,7 +75,7 @@ int main( int argc, char *argv[] ) {
 		printf("...or: %s -rtfm\n",argv[0]);
 	}
 	else {
-		int i;
+		int i = 0;
 		bool loadansi = true;
 		char file_arg = 1;
 		int cursor_x = 0;
@@ -83,7 +83,7 @@ int main( int argc, char *argv[] ) {
 		char cur_esc_seq[25];
 		char cur_esc_param[5];
 		int esc_x;
-		int cursor_x_save;
+		int cursor_x_save = 0;
 		const char *errstr;
 
 		if (argv[1][0]=='-') {
